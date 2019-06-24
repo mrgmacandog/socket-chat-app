@@ -22,6 +22,10 @@ io.on("connection", function(socket) {
     socket.on("disconnect", function(data) {
         socket.broadcast.emit("user_leave", this.username);
     });
+
+    socket.on("typing", function(data) {
+        socket.broadcast.emit("typing", data);
+    });
 });
 
 http.listen(port, function() {

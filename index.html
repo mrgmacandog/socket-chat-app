@@ -9,6 +9,16 @@
                 font-family: sans-serif;
             }
 
+            #feedback {
+                position: fixed;
+                bottom: 20px;
+                left: 0;
+                width: 100%;
+                display: flex;
+                box-sizing: border-box;
+                padding: 0.25rem;
+            }
+
             form {
                 position: fixed;
                 bottom: 0;
@@ -61,8 +71,9 @@
     </head>
     <body>
         <ul class="messages"></ul>
+        <div id="feedback"></div>
         <form>
-            <input type="text" class="input" autocomplete="off" autofocus />
+            <input id="message" type="text" class="input" autocomplete="off" autofocus />
             <button>Send</button>
         </form>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.dev.js"></script>
@@ -70,6 +81,8 @@
             const form = document.querySelector("form");
             const input = document.querySelector(".input");
             const messages = document.querySelector(".messages");
+            const feedback = document.getElementById("feedback");
+            const message = document.getElementById("message");
             const username = prompt("Please enter a nickname: ", "");
             const socket = io();
 
@@ -86,7 +99,12 @@
                 return false;
             }, false);
 
+            message.addEventListener("keypress", function() {
+                socket.emit("typing", username);
+            });
+
             socket.on("chat_message", function(data) {
+                feedback.innerHTML = "";
                 addMessage(data.username + ": " + data.message);
             });
 
@@ -96,6 +114,10 @@
 
             socket.on("user_leave", function(data) {
                 addMessage(data + " has left the chat.");
+            });
+
+            socket.on("typing", function(data) {
+                feedback.innerHTML = `<p><em>${data} is typing a message...</em></p>`;
             });
 
             addMessage("You have joined the chat as '" + username  + "'.");
